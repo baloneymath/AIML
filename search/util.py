@@ -218,9 +218,9 @@ class PriorityQueueWithFunction(PriorityQueue):
         self.priorityFunction = priorityFunction      # store the priority function
         PriorityQueue.__init__(self)        # super-class initializer
 
-    def push(self, item, problem):
+    def push(self, item):
         "Adds an item to the queue with priority from the priority function"
-        PriorityQueue.push(self, item, self.priorityFunction(item, problem))
+        PriorityQueue.push(self, item, self.priorityFunction(item))
 
 
 def manhattanDistance( xy1, xy2 ):

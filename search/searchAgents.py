@@ -333,13 +333,13 @@ class CornersProblem(search.SearchProblem):
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:
                 if (nextx,nexty) in self.corners:
-                    if (nextx,nexty) == (1,1):
+                    if (nextx, nexty) == (1, 1):
                         visited = (True, ori[1], ori[2], ori[3])
-                    elif (nextx,nexty) == (1,self.top):
+                    elif (nextx, nexty) == (1, self.top):
                         visited = (ori[0], True, ori[2], ori[3])
-                    elif (nextx,nexty) == (self.right,1):
+                    elif (nextx, nexty) == (self.right, 1):
                         visited = (ori[0], ori[1], True, ori[3])
-                    elif (nextx,nexty) == (self.right,self.top):
+                    elif (nextx, nexty) == (self.right, self.top):
                         visited = (ori[0], ori[1], ori[2], True)
                     successors.append( (((nextx, nexty), visited), action, 1) )
                 else:
@@ -378,7 +378,10 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    currPos = state[0]
+    visited = state[1]
+    dist = [util.manhattanDistance(currPos, corners[i]) for i in range(4) if not visited[i]]
+    return sum(dist)
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -472,7 +475,71 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    foodList = foodGrid.asList()
+    if len(foodList) == 0:
+        return 0
+    # trickySearch
+    # explored 5420, time 1
+    #dist = [util.manhattanDistance(position, food) for food in foodList]
+    #return sum(dist)
+    # explored 4092, time 15.1
+    #heuristic = 0
+    #farthestFoodDist = mazeDistance(position, foodList[0], problem.startingGameState)
+    #for food in foodList:
+    #    foodDist = mazeDistance(position, food, problem.startingGameState)
+    #    if foodDist > farthestFoodDist:
+    #        farthestFoodDist = foodDist
+    #heuristic = farthestFoodDist
+    #return heuristic
+    # explored 410, time 0.3
+    import heapq
+    class PriorityQueue:
+        def __init__(self):
+            self.heap = []
+        def push(self, item, priority):
+            pair = (priority, item)
+            heapq.heappush(self.heap, pair)
+        def pop(self):
+            (priority, item) = heapq.heappop(self.heap)
+            return item, priority
+        def isEmpty(self):
+            return len(self.heap) == 0
+    
+    foodList = foodGrid.asList()
+    p_queue = PriorityQueue()
+    explored = set()
+    p_queue.push(position, 0)
+    heur = 0
+    heurInfo = problem.heuristicInfo
+    if heurInfo.get('initialized') is None:
+        for i in foodList:
+            for j in foodList:
+                if (i, j) not in heurInfo and (j, i) not in heurInfo:
+                    heurInfo[(i, j)] = mazeDistance(i, j, problem.startingGameState)
+        heurInfo['initialized'] = True
+    
+    def mazeDistanceWithHeurInfo(i, j, heurInfo, problem):
+        if (i, j) in heurInfo:
+            return heurInfo[(i, j)]
+        elif (j, i) in heurInfo:
+            return heurInfo[(j, i)]
+        else:
+            dist = mazeDistance(i, j, problem.startingGameState)
+            heurInfo[(i, j)] = dist
+            return dist
+    
+    while len(explored) != len(foodList) + 1:
+        head, priority = p_queue.pop()
+        if head in explored:
+            continue
+        explored.add(head)
+        heur += priority
+        for fpoint in foodList:
+            if fpoint in explored:
+                continue
+            p_queue.push(fpoint, mazeDistanceWithHeurInfo(head, fpoint, heurInfo, problem))
+    return heur
+    
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"

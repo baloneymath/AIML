@@ -87,15 +87,16 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
+    start = problem.getStartState()
     stack = util.Stack()
-    stack.push(problem.getStartState())
+    stack.push(start)
     explored = set()
     actionList = []
     transitionTable = {}
     while not stack.isEmpty():
         node = stack.pop()
         if problem.isGoalState(node):
-            while node != problem.getStartState():
+            while node != start:
                 actionList.append(transitionTable[node][1])
                 node = transitionTable[node][0]
             actionList.reverse()
@@ -112,15 +113,16 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    start = problem.getStartState()
     queue = util.Queue()
-    queue.push(problem.getStartState())
+    queue.push(start)
     explored = set()
     actionList = []
     transitionTable = {}
     while not queue.isEmpty():
         node = queue.pop()
         if problem.isGoalState(node):
-            while node != problem.getStartState():
+            while node != start:
                 actionList.append(transitionTable[node][1])
                 node = transitionTable[node][0]
             actionList.reverse()
@@ -136,17 +138,18 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    start = problem.getStartState()
     p_queue = util.PriorityQueue()
-    p_queue.push(problem.getStartState(), 0)
+    p_queue.push(start, 0)
     explored = set()
     actionList = []
     transitionTable = {}
     dist = {}
-    dist[problem.getStartState()] = 0
+    dist[start] = 0
     while not p_queue.isEmpty():
         node = p_queue.pop()
         if problem.isGoalState(node):
-            while node != problem.getStartState():
+            while node != start:
                 actionList.append(transitionTable[node][1])
                 node = transitionTable[node][0]
             actionList.reverse()
@@ -156,7 +159,7 @@ def uniformCostSearch(problem):
         for leaf in leaves:
             child, action, stepCost = leaf[0], leaf[1], leaf[2]
             cost = dist[node] + stepCost
-            if child not in explored or cost < dist[child]:
+            if child not in explored:
                 dist[child] = cost
                 p_queue.update(child, cost)
                 transitionTable[child] = node, action            
@@ -171,15 +174,18 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    p_queue = util.PriorityQueueWithFunction(heuristic)
-    p_queue.push(problem.getStartState(), problem)
+    start = problem.getStartState()
+    p_queue = util.PriorityQueue()
+    p_queue.push(start, heuristic(start, problem))
     explored = set()
     actionList = []
     transitionTable = {}
+    dist = {}
+    dist[start] = 0
     while not p_queue.isEmpty():
         node = p_queue.pop()
         if problem.isGoalState(node):
-            while node != problem.getStartState():
+            while node != start:
                 actionList.append(transitionTable[node][1])
                 node = transitionTable[node][0]
             actionList.reverse()
@@ -187,9 +193,11 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         explored.add(node)
         leaves = problem.getSuccessors(node)
         for leaf in leaves:
-            child, action = leaf[0], leaf[1]
+            child, action, stepCost = leaf[0], leaf[1], leaf[2]
+            cost = dist[node] + stepCost
             if child not in explored:
-                p_queue.push(child, problem)
+                dist[child] = cost
+                p_queue.update(child, cost + heuristic(child, problem))
                 transitionTable[child] = node, action
 
 
