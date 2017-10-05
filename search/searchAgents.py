@@ -288,6 +288,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.startingGameState = startingGameState
         self.top = top
         self.right = right
 
@@ -305,7 +306,7 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        return state[1][0] & state[1][1] & state[1][2] & state[1][3]
+        return (state[1][0] and state[1][1] and state[1][2] and state[1][3])
 
     def getSuccessors(self, state):
         """
@@ -380,8 +381,10 @@ def cornersHeuristic(state, problem):
     "*** YOUR CODE HERE ***"
     currPos = state[0]
     visited = state[1]
-    dist = [util.manhattanDistance(currPos, corners[i]) for i in range(4) if not visited[i]]
-    return sum(dist)
+    dist = [mazeDistance(currPos, corners[i], problem.startingGameState) for i in range(4) if not visited[i]]
+    if len(dist) == 0:
+        return 0
+    return max(dist)
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -479,10 +482,10 @@ def foodHeuristic(state, problem):
     if len(foodList) == 0:
         return 0
     # trickySearch
-    # explored 5420, time 1
+    # explored 5402, time 1.3
     #dist = [util.manhattanDistance(position, food) for food in foodList]
     #return sum(dist)
-    # explored 4092, time 15.1
+    # explored 4110, time 15.1
     #heuristic = 0
     #farthestFoodDist = mazeDistance(position, foodList[0], problem.startingGameState)
     #for food in foodList:
@@ -491,9 +494,9 @@ def foodHeuristic(state, problem):
     #        farthestFoodDist = foodDist
     #heuristic = farthestFoodDist
     #return heuristic
-    # explored 410, time 0.3
+    # explored 409, time 0.3
     import heapq
-    class PriorityQueue:
+    class PQueue:
         def __init__(self):
             self.heap = []
         def push(self, item, priority):
@@ -506,7 +509,7 @@ def foodHeuristic(state, problem):
             return len(self.heap) == 0
     
     foodList = foodGrid.asList()
-    p_queue = PriorityQueue()
+    p_queue = PQueue()
     explored = set()
     p_queue.push(position, 0)
     heur = 0

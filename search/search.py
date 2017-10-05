@@ -91,6 +91,7 @@ def depthFirstSearch(problem):
     stack = util.Stack()
     stack.push(start)
     explored = set()
+    explored.add(start)
     actionList = []
     transitionTable = {}
     while not stack.isEmpty():
@@ -101,11 +102,11 @@ def depthFirstSearch(problem):
                 node = transitionTable[node][0]
             actionList.reverse()
             return actionList
-        explored.add(node)
         leaves = problem.getSuccessors(node)
         for leaf in leaves:
             child, action = leaf[0], leaf[1]
             if child not in explored:
+                explored.add(child)
                 stack.push(child)
                 transitionTable[child] = node, action
 
@@ -117,6 +118,7 @@ def breadthFirstSearch(problem):
     queue = util.Queue()
     queue.push(start)
     explored = set()
+    explored.add(start)
     actionList = []
     transitionTable = {}
     while not queue.isEmpty():
@@ -127,11 +129,11 @@ def breadthFirstSearch(problem):
                 node = transitionTable[node][0]
             actionList.reverse()
             return actionList
-        explored.add(node)
         leaves = problem.getSuccessors(node)
         for leaf in leaves:
             child, action = leaf[0], leaf[1]
             if child not in explored:
+                explored.add(child)
                 queue.push(child)
                 transitionTable[child] = node, action
 
@@ -142,6 +144,7 @@ def uniformCostSearch(problem):
     p_queue = util.PriorityQueue()
     p_queue.push(start, 0)
     explored = set()
+    explored.add(start)
     actionList = []
     transitionTable = {}
     dist = {}
@@ -154,13 +157,13 @@ def uniformCostSearch(problem):
                 node = transitionTable[node][0]
             actionList.reverse()
             return actionList
-        explored.add(node)
         leaves = problem.getSuccessors(node)
         for leaf in leaves:
             child, action, stepCost = leaf[0], leaf[1], leaf[2]
             cost = dist[node] + stepCost
             if child not in explored:
                 dist[child] = cost
+                explored.add(child)
                 p_queue.update(child, cost)
                 transitionTable[child] = node, action            
 
@@ -178,6 +181,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     p_queue = util.PriorityQueue()
     p_queue.push(start, heuristic(start, problem))
     explored = set()
+    explored.add(start)
     actionList = []
     transitionTable = {}
     dist = {}
@@ -190,13 +194,13 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                 node = transitionTable[node][0]
             actionList.reverse()
             return actionList
-        explored.add(node)
         leaves = problem.getSuccessors(node)
         for leaf in leaves:
             child, action, stepCost = leaf[0], leaf[1], leaf[2]
             cost = dist[node] + stepCost
             if child not in explored:
                 dist[child] = cost
+                explored.add(child)
                 p_queue.update(child, cost + heuristic(child, problem))
                 transitionTable[child] = node, action
 
