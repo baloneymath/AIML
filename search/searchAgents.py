@@ -485,63 +485,67 @@ def foodHeuristic(state, problem):
     # explored 5402, time 1.3
     #dist = [util.manhattanDistance(position, food) for food in foodList]
     #return sum(dist)
-    # explored 4110, time 15.1
-    #heuristic = 0
-    #farthestFoodDist = mazeDistance(position, foodList[0], problem.startingGameState)
-    #for food in foodList:
-    #    foodDist = mazeDistance(position, food, problem.startingGameState)
-    #    if foodDist > farthestFoodDist:
-    #        farthestFoodDist = foodDist
-    #heuristic = farthestFoodDist
-    #return heuristic
-    # explored 409, time 0.3
-    import heapq
-    class PQueue:
-        def __init__(self):
-            self.heap = []
-        def push(self, item, priority):
-            pair = (priority, item)
-            heapq.heappush(self.heap, pair)
-        def pop(self):
-            (priority, item) = heapq.heappop(self.heap)
-            return item, priority
-        def isEmpty(self):
-            return len(self.heap) == 0
-    
-    foodList = foodGrid.asList()
-    p_queue = PQueue()
-    explored = set()
-    p_queue.push(position, 0)
-    heur = 0
-    heurInfo = problem.heuristicInfo
-    if heurInfo.get('initialized') is None:
-        for i in foodList:
-            for j in foodList:
-                if (i, j) not in heurInfo and (j, i) not in heurInfo:
-                    heurInfo[(i, j)] = mazeDistance(i, j, problem.startingGameState)
-        heurInfo['initialized'] = True
-    
-    def mazeDistanceWithHeurInfo(i, j, heurInfo, problem):
-        if (i, j) in heurInfo:
-            return heurInfo[(i, j)]
-        elif (j, i) in heurInfo:
-            return heurInfo[(j, i)]
-        else:
-            dist = mazeDistance(i, j, problem.startingGameState)
-            heurInfo[(i, j)] = dist
-            return dist
-    
-    while len(explored) != len(foodList) + 1:
-        head, priority = p_queue.pop()
-        if head in explored:
-            continue
-        explored.add(head)
-        heur += priority
-        for fpoint in foodList:
-            if fpoint in explored:
-                continue
-            p_queue.push(fpoint, mazeDistanceWithHeurInfo(head, fpoint, heurInfo, problem))
-    return heur
+    # explored 4110, time 14.4
+    #dist = [mazeDistance(position, food, problem.startingGameState) for food in foodList]
+    #return max(dist)
+    # expolored 1795, time 13.6
+    midx = 0
+    mindist = 1e9
+    for i in range(len(foodList)):
+        d = mazeDistance(position, foodList[i], problem.startingGameState)
+        if d < mindist:
+            midx = i
+            mindist = d
+    dist = [mazeDistance(foodList[midx], food, problem.startingGameState) for food in foodList]
+    return mindist + max(dist)
+    # explored 409, time 0.3 (non-consistent)
+    #import heapq
+    #class PQueue:
+    #    def __init__(self):
+    #        self.heap = []
+    #    def push(self, item, priority):
+    #        pair = (priority, item)
+    #        heapq.heappush(self.heap, pair)
+    #    def pop(self):
+    #        (priority, item) = heapq.heappop(self.heap)
+    #        return item, priority
+    #    def isEmpty(self):
+    #        return len(self.heap) == 0
+    #
+    #foodList = foodGrid.asList()
+    #p_queue = PQueue()
+    #explored = set()
+    #p_queue.push(position, 0)
+    #heur = 0
+    #heurInfo = problem.heuristicInfo
+    #if heurInfo.get('initialized') is None:
+    #    for i in foodList:
+    #        for j in foodList:
+    #            if (i, j) not in heurInfo and (j, i) not in heurInfo:
+    #                heurInfo[(i, j)] = mazeDistance(i, j, problem.startingGameState)
+    #    heurInfo['initialized'] = True
+    #
+    #def mazeDistanceWithHeurInfo(i, j, heurInfo, problem):
+    #    if (i, j) in heurInfo:
+    #        return heurInfo[(i, j)]
+    #    elif (j, i) in heurInfo:
+    #        return heurInfo[(j, i)]
+    #    else:
+    #        dist = mazeDistance(i, j, problem.startingGameState)
+    #        heurInfo[(i, j)] = dist
+    #        return dist
+    #
+    #while len(explored) != len(foodList) + 1:
+    #    head, priority = p_queue.pop()
+    #    if head in explored:
+    #        continue
+    #    explored.add(head)
+    #    heur += priority
+    #    for fpoint in foodList:
+    #        if fpoint in explored:
+    #            continue
+    #        p_queue.push(fpoint, mazeDistanceWithHeurInfo(head, fpoint, heurInfo, problem))
+    #return heur
     
 
 class ClosestDotSearchAgent(SearchAgent):
