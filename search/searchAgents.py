@@ -482,13 +482,13 @@ def foodHeuristic(state, problem):
     if len(foodList) == 0:
         return 0
     # trickySearch
-    # explored 5402, time 1.3
+    # explored 5423, time 1.3
     #dist = [util.manhattanDistance(position, food) for food in foodList]
     #return sum(dist)
-    # explored 4110, time 14.4
+    # explored 4137, time 14.4
     #dist = [mazeDistance(position, food, problem.startingGameState) for food in foodList]
     #return max(dist)
-    # expolored 1795, time 13.6
+    # expolored 1818, time 13.6
     midx = 0
     mindist = 1e9
     for i in range(len(foodList)):
@@ -498,7 +498,7 @@ def foodHeuristic(state, problem):
             mindist = d
     dist = [mazeDistance(foodList[midx], food, problem.startingGameState) for food in foodList]
     return mindist + max(dist)
-    # explored 409, time 0.3 (non-consistent)
+    # explored 410, time 0.3 (non-consistent)
     #import heapq
     #class PQueue:
     #    def __init__(self):

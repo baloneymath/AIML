@@ -149,8 +149,11 @@ def uniformCostSearch(problem):
     transitionTable = {}
     dist = {}
     dist[start] = 0
+    inPqueue = set()
+    inPqueue.add(start)
     while not p_queue.isEmpty():
         node = p_queue.pop()
+        inPqueue.remove(node)
         if problem.isGoalState(node):
             while node != start:
                 actionList.append(transitionTable[node][1])
@@ -164,8 +167,14 @@ def uniformCostSearch(problem):
             if child not in explored:
                 dist[child] = cost
                 explored.add(child)
-                p_queue.update(child, cost)
+                inPqueue.add(child)
+                p_queue.push(child, cost)
                 transitionTable[child] = node, action            
+            elif cost < dist[child]:
+                dist[child] = cost
+                transitionTable[child] = node, action
+                if child in inPqueue:
+                    p_queue.update(child, cost)
 
 def nullHeuristic(state, problem=None):
     """
@@ -186,8 +195,13 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     transitionTable = {}
     dist = {}
     dist[start] = 0
+    aCost = {}
+    aCost[start] = heuristic(start, problem)
+    inPqueue = set()
+    inPqueue.add(start)
     while not p_queue.isEmpty():
         node = p_queue.pop()
+        inPqueue.remove(node)
         if problem.isGoalState(node):
             while node != start:
                 actionList.append(transitionTable[node][1])
@@ -198,12 +212,20 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         for leaf in leaves:
             child, action, stepCost = leaf[0], leaf[1], leaf[2]
             cost = dist[node] + stepCost
+            astarCost = cost + heuristic(child, problem)
             if child not in explored:
                 dist[child] = cost
+                aCost[child] = astarCost
                 explored.add(child)
-                p_queue.update(child, cost + heuristic(child, problem))
+                inPqueue.add(child)
                 transitionTable[child] = node, action
-
+                p_queue.push(child, astarCost)
+            elif astarCost < aCost[child]:
+                dist[child] = cost
+                aCost[child] = astarCost
+                transitionTable[child] = node, action
+                if child in inPqueue:
+                    p_queue.update(child, astarCost)
 
 # Abbreviations
 bfs = breadthFirstSearch
