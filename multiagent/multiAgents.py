@@ -86,15 +86,15 @@ class ReflexAgent(Agent):
         capsulesPosList = currentGameState.getCapsules()
         
         for i in range(len(newGhostPosList)):
-            if newPos == newGhostPosList[i] and newScaredTimes[i] == 0:
+            if manhattanDistance(newPos, newGhostPosList[i]) <= 1 and newScaredTimes[i] == 0:
                 return eaten_by_ghost
+        score = 0
         scaredGhostPosList = []
         for i in range(len(newGhostPosList)):
             if newScaredTimes[i] != 0:
                 scaredGhostPosList.append(newGhostPosList[i])
         if len(scaredGhostPosList) != 0:
-            return 1.0 / min([manhattanDistance(newPos, gPos) for gPos in scaredGhostPosList])
-        score = 0
+            score += max([1.0 / manhattanDistance(newPos, gPos) for gPos in scaredGhostPosList])
         if currentGameState.hasFood(newx, newy):
             score += eat_food
         if newPos in capsulesPosList:
@@ -139,7 +139,7 @@ class MultiAgentSearchAgent(Agent):
 class MinimaxAgent(MultiAgentSearchAgent):
     """
       Your minimax agent (question 2)
-    """
+    """ 
 
     def getAction(self, gameState):
         """
@@ -159,7 +159,37 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def minimax(gameState, depth, agentIndex):
+            if gameState.isWin() or gameState.isLose() or (depth == self.depth and agentIndex == gameState.getNumAgents() - 1):
+                return self.evaluationFunction(gameState)
+            next_agent_index = agentIndex + 1
+            if next_agent_index == gameState.getNumAgents():
+                next_agent_index = 0
+                depth += 1
+            legalMoves = gameState.getLegalActions(agentIndex)
+            scores = []
+            for action in legalMoves:
+                if action == 'Stop':
+                    continue
+                child = gameState.generateSuccessor(agentIndex, action)
+                scores.append(minimax(child, depth, next_agent_index))
+            if agentIndex == 0:
+                return max(scores)
+            else:
+                return min(scores)
+        numAgents = gameState.getNumAgents()
+        legalMoves = gameState.getLegalActions(0)
+        while legalMoves.count('Stop') != 0:
+            legalMoves.remove('Stop')
+        scores = [minimax(gameState.generateSuccessor(0, action), 1, 1) for action in legalMoves]
+        bestScore = -1e9
+        bestIndices = []
+        for i in range(len(scores)):
+            if scores[i] >= bestScore:
+                bestScore = scores[i]
+                bestIndices.append(i)
+        print bestScore
+        return legalMoves[random.choice(bestIndices)]
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
