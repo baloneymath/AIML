@@ -160,35 +160,35 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         def minimax(gameState, depth, agentIndex):
-            if gameState.isWin() or gameState.isLose() or (depth == self.depth and agentIndex == gameState.getNumAgents() - 1):
+            if gameState.isWin() or gameState.isLose() or depth == 0:
                 return self.evaluationFunction(gameState)
-            next_agent_index = agentIndex + 1
-            if next_agent_index == gameState.getNumAgents():
-                next_agent_index = 0
-                depth += 1
+            next_agentIndex = agentIndex + 1
+            if next_agentIndex == gameState.getNumAgents():
+                next_agentIndex = 0
+                depth -= 1
             legalMoves = gameState.getLegalActions(agentIndex)
             scores = []
-            for action in legalMoves:
-                if action == 'Stop':
-                    continue
-                child = gameState.generateSuccessor(agentIndex, action)
-                scores.append(minimax(child, depth, next_agent_index))
             if agentIndex == 0:
+                for action in legalMoves:
+                    if action == 'Stop':
+                        continue
+                    child = gameState.generateSuccessor(agentIndex, action)
+                    scores.append(minimax(child, depth, next_agentIndex))
                 return max(scores)
             else:
+                for action in legalMoves:
+                    if action == 'Stop':
+                        continue
+                    child = gameState.generateSuccessor(agentIndex, action)
+                    scores.append(minimax(child, depth, next_agentIndex))
                 return min(scores)
-        numAgents = gameState.getNumAgents()
+
         legalMoves = gameState.getLegalActions(0)
         while legalMoves.count('Stop') != 0:
             legalMoves.remove('Stop')
-        scores = [minimax(gameState.generateSuccessor(0, action), 1, 1) for action in legalMoves]
-        bestScore = -1e9
-        bestIndices = []
-        for i in range(len(scores)):
-            if scores[i] >= bestScore:
-                bestScore = scores[i]
-                bestIndices.append(i)
-        print bestScore
+        scores = [minimax(gameState.generateSuccessor(0, action), self.depth, 1) for action in legalMoves]
+        bestScore = max(scores)
+        bestIndices = [idx for idx in range(len(scores)) if scores[idx] == bestScore]
         return legalMoves[random.choice(bestIndices)]
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
@@ -201,7 +201,45 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def alphabeta(gameState, depth, agentIndex, alpha, beta):
+            if gameState.isWin() or gameState.isLose() or depth == 0:
+                return self.evaluationFunction(gameState)
+            next_agentIndex = agentIndex + 1
+            if next_agentIndex == gameState.getNumAgents():
+                next_agentIndex = 0
+                depth -= 1
+            legalMoves = gameState.getLegalActions(agentIndex)
+            scores = []
+            if agentIndex == 0:
+                for action in legalMoves:
+                    if action == 'Stop':
+                        continue
+                    child = gameState.generateSuccessor(agentIndex, action)
+                    score = alphabeta(child, depth, next_agentIndex, alpha, beta)
+                    scores.append(score)
+                    alpha = max(alpha, score)
+                    if beta <= alpha:
+                        break
+                return max(scores)
+            else:
+                for action in legalMoves:
+                    if action == 'Stop':
+                        continue
+                    child = gameState.generateSuccessor(agentIndex, action)
+                    score = alphabeta(child, depth, next_agentIndex, alpha, beta)
+                    scores.append(score)
+                    beta = min(beta, score)
+                    if beta <= alpha:
+                        break
+                return min(scores)
+
+        legalMoves = gameState.getLegalActions(0)
+        while legalMoves.count('Stop') != 0:
+            legalMoves.remove('Stop')
+        scores = [alphabeta(gameState.generateSuccessor(0, action), self.depth, 1, -1e9, 1e9) for action in legalMoves]
+        bestScore = max(scores)
+        bestIndices = [idx for idx in range(len(scores)) if scores[idx] == bestScore]
+        return legalMoves[random.choice(bestIndices)]
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -216,7 +254,37 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def expectiMinimax(gameState, depth, agentIndex):
+            if gameState.isWin() or gameState.isLose() or depth == 0:
+                return self.evaluationFunction(gameState)
+            next_agentIndex = agentIndex + 1
+            if next_agentIndex == gameState.getNumAgents():
+                next_agentIndex = 0
+                depth -= 1
+            legalMoves = gameState.getLegalActions(agentIndex)
+            scores = []
+            if agentIndex == 0:
+                for action in legalMoves:
+                    if action == 'Stop':
+                        continue
+                    child = gameState.generateSuccessor(agentIndex, action)
+                    scores.append(expectiMinimax(child, depth, next_agentIndex))
+                return max(scores)
+            else:
+                for action in legalMoves:
+                    if action == 'Stop':
+                        continue
+                    child = gameState.generateSuccessor(agentIndex, action)
+                    scores.append(expectiMinimax(child, depth, next_agentIndex))
+                return float(sum(scores) / len(scores))
+
+        legalMoves = gameState.getLegalActions(0)
+        while legalMoves.count('Stop') != 0:
+            legalMoves.remove('Stop')
+        scores = [expectiMinimax(gameState.generateSuccessor(0, action), self.depth, 1) for action in legalMoves]
+        bestScore = max(scores)
+        bestIndices = [idx for idx in range(len(scores)) if scores[idx] == bestScore]
+        return legalMoves[random.choice(bestIndices)]
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -226,7 +294,64 @@ def betterEvaluationFunction(currentGameState):
       DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    if currentGameState.isWin():
+        return 1e9
+    elif currentGameState.isLose():
+        return -1e9
+    walls = currentGameState.getWalls()
+    pos = currentGameState.getPacmanPosition()
+    foodList = currentGameState.getFood().asList()
+    ghostList = currentGameState.getGhostPositions()
+    scaredTimes = [gState.scaredTimer for gState in currentGameState.getGhostStates()]
+    capsulesList = currentGameState.getCapsules()
+    scaredGhostList = [ghostList[i] for i in range(len(scaredTimes)) if scaredTimes[i] >= manhattanDistance(pos, ghostList[i]) * 2]
+    bravedGhostList = [ghost for ghost in ghostList if ghost not in scaredGhostList]
+
+    mazeDist = {}
+    mazeDist[pos] = 0
+    canEatDist = {}
+    ghostDist = {}
+    for food in foodList:
+        canEatDist[food] = 1e9
+    for capsule in capsulesList:
+        canEatDist[capsule] = 1e9
+    for ghost in ghostList:
+        ghostDist[ghost] = 1e9
+
+    queue = util.Queue()
+    queue.push(pos)
+    dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    while not queue.isEmpty():
+        x, y = queue.pop()
+        dist = mazeDist[(x, y)]
+        if (x, y) in canEatDist:
+            canEatDist[(x, y)] = dist
+        elif (x, y) in ghostDist:
+            ghostDist[(x, y)] = dist
+        for dr in dirs:
+            dx, dy = dr[0], dr[1]
+            newx, newy = x + dx, y + dy
+            if (newx, newy) in mazeDist or walls[newx][newy] or (newx, newy) in bravedGhostList:
+                continue
+            queue.push((newx, newy))
+            mazeDist[(newx, newy)] = dist + 1
+    
+    inv_foodDist = [1.0 / canEatDist[food] for food in foodList]
+    inv_capDist = [1.0 / canEatDist[capsule] for capsule in capsulesList]
+    inv_scaredGPos = [1.0 / ghostDist[gPos] for gPos in scaredGhostList]
+    inv_braveGPos = [1.0 / ghostDist[gPos] for gPos in bravedGhostList]
+    score = scoreEvaluationFunction(currentGameState)
+    if len(inv_foodDist) != 0:
+        #score += max(inv_foodDist)
+        score += sum(inv_foodDist)
+    if len(inv_capDist) != 0:
+        score += 100 * sum(inv_capDist)
+    if len(scaredGhostList) != 0:
+        #score += max(inv_scaredGPos)
+        score += 200 * sum(inv_scaredGPos)
+    if len(bravedGhostList) != 0:
+        score += 1000 * sum(inv_braveGPos)
+    return score
 
 # Abbreviation
 better = betterEvaluationFunction
