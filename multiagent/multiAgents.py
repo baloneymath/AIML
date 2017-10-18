@@ -338,19 +338,21 @@ def betterEvaluationFunction(currentGameState):
     
     inv_foodDist = [1.0 / canEatDist[food] for food in foodList]
     inv_capDist = [1.0 / canEatDist[capsule] for capsule in capsulesList]
-    inv_scaredGPos = [1.0 / ghostDist[gPos] for gPos in scaredGhostList]
-    inv_braveGPos = [1.0 / ghostDist[gPos] for gPos in bravedGhostList]
+    inv_scaredGDist = [1.0 / ghostDist[gPos] for gPos in scaredGhostList]
+    inv_braveGDist = [1.0 / ghostDist[gPos] for gPos in bravedGhostList]
     score = scoreEvaluationFunction(currentGameState)
     if len(inv_foodDist) != 0:
         #score += max(inv_foodDist)
         score += sum(inv_foodDist)
     if len(inv_capDist) != 0:
+        score += max(inv_capDist)
         score += 100 * sum(inv_capDist)
     if len(scaredGhostList) != 0:
-        #score += max(inv_scaredGPos)
-        score += 200 * sum(inv_scaredGPos)
+        score += 10 * max(inv_scaredGDist)
+        score += 200 * sum(inv_scaredGDist)
     if len(bravedGhostList) != 0:
-        score += 1000 * sum(inv_braveGPos)
+        score += 50 * max(inv_braveGDist)
+        score += 1000 * sum(inv_braveGDist)
     return score
 
 # Abbreviation
