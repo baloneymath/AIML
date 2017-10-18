@@ -74,35 +74,36 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
+        if action == 'Stop':
+            return -1e7
         eat_food = 1e3
         eat_capsule = 2e3
         eaten_by_ghost = -1e9
-        stop = -1e3
 
         newx, newy = newPos
         newFoodList = newFood.asList()
         newGhostPosList = successorGameState.getGhostPositions()
         capsulesPosList = currentGameState.getCapsules()
         
-        if action == 'Stop':
-            return stop
         for i in range(len(newGhostPosList)):
             if newPos == newGhostPosList[i] and newScaredTimes[i] == 0:
                 return eaten_by_ghost
-        score = 0
-        if currentGameState.hasFood(newx, newy):
-            return eat_food
-        if newPos in capsulesPosList:
-            return eat_capsule
         scaredGhostPosList = []
         for i in range(len(newGhostPosList)):
             if newScaredTimes[i] != 0:
                 scaredGhostPosList.append(newGhostPosList[i])
         if len(scaredGhostPosList) != 0:
             return 1.0 / min([manhattanDistance(newPos, gPos) for gPos in scaredGhostPosList])
+        score = 0
+        if currentGameState.hasFood(newx, newy):
+            score += eat_food
+        if newPos in capsulesPosList:
+            score += eat_capsule
         if len(newFoodList) != 0:
-            return 1.0 / min([manhattanDistance(newPos, food) for food in newFoodList])
-        
+            inv_dist = [1.0 / manhattanDistance(newPos, food) for food in newFoodList]
+            score += max(inv_dist)
+            score += sum(inv_dist) / len(inv_dist)
+
         return score
 
 def scoreEvaluationFunction(currentGameState):
