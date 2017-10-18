@@ -75,9 +75,9 @@ class ReflexAgent(Agent):
 
         "*** YOUR CODE HERE ***"
         if action == 'Stop':
-            return -1e7
-        eat_food = 1e3
-        eat_capsule = 2e3
+            return -1e9
+        eat_food = 1000
+        eat_capsule = 500
         eaten_by_ghost = -1e9
 
         newx, newy = newPos
@@ -102,7 +102,7 @@ class ReflexAgent(Agent):
         if len(newFoodList) != 0:
             inv_dist = [1.0 / manhattanDistance(newPos, food) for food in newFoodList]
             score += max(inv_dist)
-            score += sum(inv_dist) / len(inv_dist)
+            score += sum(inv_dist)
 
         return score
 
