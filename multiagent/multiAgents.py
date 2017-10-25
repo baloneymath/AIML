@@ -351,7 +351,7 @@ def betterEvaluationFunction(currentGameState):
         score += 10 * max(inv_scaredGDist)
         score += 200 * sum(inv_scaredGDist)
     if len(bravedGhostList) != 0:
-        score -= 5 * max(inv_braveGDist)
+        score -= 50 * max(inv_braveGDist)
         score -= 500 * sum(inv_braveGDist)
     return score
 
