@@ -1,0 +1,31 @@
+#############################################################################
+# Author: Hao Chen (b03901016)                                              #
+# Synopsis: Describe the heuristic of Q5                                    #
+#############################################################################
+
+    First, I classified all the ghosts to two types, scared and brave, then compute the
+maze distance from pacman to all the meaningful objects using a BFS-like (priority queue)
+method. In the computation of maze distance, I consider the brave ghosts as a wall and
+and can go through the scared ghosts. Moreover, a ghost is consider scared if it's scared
+time is twice more than the distance from pacman's position to its position.
+
+1. food: 
+        After the maze distance of each food is computed, my heuristic add a positive score
+    of the maximum value of inverse food distance and the sum of the inverse food distances,
+    it means that the pacman will have a great local finding ability of near foods and better
+    global view of the current food distribution of the whole maze.
+
+2. capsule:
+        Same as the concept of finding the food, I add positive scores of the maximum inverse
+    distance and the sum of inverse distances, but with larger weights, so that pacman will
+    tend to eat the capsule and be stronger.
+
+3. scared ghost:
+        Same as the concept of finding the food, I add positive scores of the maximum inverse
+    distance and the sum of inverse distances, and with weights even bigger than the weights
+    of finding capsules, so that pacman will go chasing the scared ghosts.
+
+4. brave ghost:
+        To brave ghosts, I add "negative" scores of of the maximum inverse distance and the sum
+    of inverse distances, so that pacman will avoid the brave ghost, and would not likely to
+    die. Also, we consider both local information and global information together.
