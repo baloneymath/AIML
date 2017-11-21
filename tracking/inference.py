@@ -315,7 +315,6 @@ class ParticleFilter(InferenceModule):
             del self.particles[:]
             for i in range(self.numParticles):
                 self.particles.append(util.sample(allPossible))
-        self.beliefs = allPossible
 
     def elapseTime(self, gameState):
         """
@@ -346,11 +345,11 @@ class ParticleFilter(InferenceModule):
         Counter object)
         """
         "*** YOUR CODE HERE ***"
-        self.beliefs = util.Counter()
+        beliefs = util.Counter()
         for pos in self.particles:
-            self.beliefs[pos] += 1
-        self.beliefs.normalize()
-        return self.beliefs
+            beliefs[pos] += 1
+        beliefs.normalize()
+        return beliefs
 
 class MarginalInference(InferenceModule):
     """
